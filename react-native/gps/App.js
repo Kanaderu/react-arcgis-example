@@ -23,6 +23,13 @@ export default class App extends Component {
         }
       }
     }
+    this.positionCallback = this.positionCallback.bind(this)
+  }
+
+  positionCallback(position) {
+    this.setState({
+      location: position
+    });
   }
 
   componentDidMount() {
@@ -36,14 +43,16 @@ export default class App extends Component {
       */
       if (true) {
         Geolocation.getCurrentPosition(
-          (position) => {
-            //console.log(position);
-            this.setState({
-              location: position
-            });
-          },
+          this.positionCallback,
           (error) => {
             // See error code charts below.
+            console.log(error.code, error.message);
+          },
+          { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+        );
+        Geolocation.watchPosition(
+          this.positionCallback,
+          (error) => {
             console.log(error.code, error.message);
           },
           { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
