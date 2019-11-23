@@ -48,14 +48,14 @@ export default class App extends Component {
             // See error code charts below.
             console.log(error.code, error.message);
           },
-          { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+          { distanceFilter: 20, enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
         );
         Geolocation.watchPosition(
           this.positionCallback,
           (error) => {
             console.log(error.code, error.message);
           },
-          { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+          { distanceFilter: 20, enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
         );
       }
     } catch (err) {
