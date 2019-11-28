@@ -1,11 +1,25 @@
 import React, { Component } from 'react';
 import { w3cwebsocket as W3CWebSocket } from 'websocket';
-import Point from './Point';
 import { Map } from '@esri/react-arcgis';
 import { loadModules } from 'esri-loader';
 
 const group_name = 'test';
 const client = new W3CWebSocket('ws://127.0.0.1:8088/ws/vehicles/' + group_name + '/');
+
+const Point = (props) => {
+    Object.keys(props.locations).map((location, id) => {
+        // remove old graphic if it exists
+        props.locations[`${location}`].oldGraphic &&
+        props.view.graphics.remove(props.locations[`${location}`].oldGraphic);
+
+        // add new graphic
+        props.locations[`${location}`].graphic &&
+        props.view.graphics.add(props.locations[`${location}`].graphic);
+
+        return null;
+    });
+    return null;
+};
 
 class App extends Component {
   constructor(props) {
