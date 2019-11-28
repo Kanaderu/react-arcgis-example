@@ -6,19 +6,19 @@ const instructions = Platform.select({
   android: 'Double tap R on your keyboard to reload,\n' + 'Shake or press menu button for dev menu',
 });
 
-const group_name = 'test'
-const client = new WebSocket('ws://127.0.0.1:8088/ws/vehicles/' + group_name + '/');
+const group_name = 'test';
+const client = new WebSocket('ws://10.0.2.2:8088/ws/vehicles/' + group_name + '/');
 
 export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-        inputMsg: "",
-        inputLat: 0,
-        inputLon: 0,
-        msg: "",
-        lat: 0,
-        lon: 0,
+      msg: "",
+      lat: 0,
+      lon: 0,
+      msgLog: "",
+      latLog: 0,
+      lonLog: 0,
     }
   }
 
@@ -32,35 +32,30 @@ export default class App extends Component {
     };
 
     client.onmessage = (message) => {
-      console.log("Message!");
-      console.log(message);
       const dataFromServer = JSON.parse(message.data);
-      console.log(dataFromServer);
       this.setState({
-          msg: this.state.msg + dataFromServer.message + '\n',
-          lat: dataFromServer.lat,
-          lon: dataFromServer.lon,
+        msgLog: this.state.msgLog + dataFromServer.message + '\n',
+        latLog: dataFromServer.lat,
+        lonLog: dataFromServer.lon,
       });
     }
   }
 
   handleSubmit = (event) => {
     event.preventDefault();
-    console.log('Submitting!');
     client.send(JSON.stringify({
-      message: this.state.inputMsg,
-      lat: this.state.inputLat,
-      lon: this.state.inputLon,
+      message: this.state.msg,
+      lat: parseFloat(this.state.lat),
+      lon: parseFloat(this.state.lon),
     }));
-  }
+  };
 
-  handleChange = (event) => {
-    console.log(event.target.id);
+  handleChange = (name) => (event, value) => {
     this.setState({
-        [event.target.name]: event.target.value
+      [name]: event.nativeEvent.text
     });
     console.log(this.state);
-  }
+  };
 
   render() {
     return (
@@ -68,9 +63,9 @@ export default class App extends Component {
         <TextInput multiline={true} value={this.state.msg}/>
         <TextInput multiline={false} value={this.state.lat.toString()}/>
         <TextInput multiline={false} value={this.state.lon.toString()}/>
-        <TextInput name="inputMsg" multiline={false} editable onChange={this.handleChange}/>
-        <TextInput name="inputLat" keyboardType={`numeric`} multiline={false} editable onChange={this.handleChange}/>
-        <TextInput name="inputLon" keyboardType={`numeric`} multiline={false} editable onChange={this.handleChange}/>
+        <TextInput multiline={false} editable onChange={this.handleChange('msg')}/>
+        <TextInput keyboardType={`numeric`} multiline={false} editable onChange={this.handleChange('lat')}/>
+        <TextInput keyboardType={`numeric`} multiline={false} editable onChange={this.handleChange('lon')}/>
 
         <Button onPress={this.handleSubmit} title="Submit" />
 
