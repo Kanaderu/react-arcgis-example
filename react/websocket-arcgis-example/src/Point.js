@@ -1,36 +1,16 @@
-import { useState, useEffect } from 'react';
-import { loadModules } from 'esri-loader';
+const APoint = (props) => {
+    Object.keys(props.locations).map((location, id) => {
+        // remove old graphic if it exists
+        props.locations[`${location}`].oldGraphic &&
+        props.view.graphics.remove(props.locations[`${location}`].oldGraphic);
 
-const Point = (props) => {
+        // add new graphic
+        props.locations[`${location}`].graphic &&
+        props.view.graphics.add(props.locations[`${location}`].graphic);
 
-    const [graphic, setGraphic] = useState(null);
-    useEffect(() => {
-
-        loadModules(['esri/Graphic']).then(([Graphic]) => {
-
-            // create a point
-            const point = {
-                type: "point", // autocasts as new Point()
-                x: props.lon,
-                y: props.lat,
-            };
-
-            // Add the geometry and symbol to a new graphic
-            const graphic = new Graphic({
-                geometry: point,
-                //symbol: fillSymbol
-            });
-            setGraphic(graphic);
-            props.view.graphics.add(graphic);
-        }).catch((err) => console.error(err));
-
-        return function cleanup() {
-            props.view.graphics.remove(graphic);
-        };
-    }, []);
-
+        return null;
+    });
     return null;
-
 };
 
-export default Point;
+export default APoint;

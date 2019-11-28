@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { w3cwebsocket as W3CWebSocket } from 'websocket';
 import Point from './Point';
 import { Map } from '@esri/react-arcgis';
+import { loadModules } from 'esri-loader';
 
 const group_name = 'test';
 const client = new W3CWebSocket('ws://127.0.0.1:8088/ws/vehicles/' + group_name + '/');
@@ -17,33 +18,48 @@ class App extends Component {
   UNSAFE_componentWillMount() {
     client.onopen = () => {
       console.log('Websocket Client Connected');
-    }
+    };
 
     client.onclose = () => {
       console.log('Websocket closed unexpectedly');
-    }
+    };
 
     client.onmessage = (message) => {
       const data = JSON.parse(message.data);
-      this.setState((prevState, props) => {
+
+      loadModules(['esri/Graphic']).then(([Graphic]) => {
+        // create a point
+        const point = {
+          type: "point", // autocasts as new Point()
+            x: data.lon,
+            y: data.lat,
+        };
+
+        // Add the geometry and symbol to a new graphic
+        const graphic = Graphic({
+          geometry: point,
+          //symbol: fillSymbol
+        });
+
+        this.setState((prevState, props) => {
+          // update oldGraphic if `graphic` in the previous state exists
+          const prevLoc = prevState.locations[`${data.message}`];
+          const oldGraphic = (prevLoc && prevLoc.graphic) ? prevLoc.graphic : null;
+
           const newState = { ...prevState };
           newState.locations[`${data.message}`] = {
-              lat: data.lat,
-              lon: data.lon,
-          }
+            lat: data.lat,
+            lon: data.lon,
+            oldGraphic: oldGraphic,
+            graphic: graphic
+          };
           return newState;
-      });
-      //console.log(this.state);
+        });
+      }).catch((err) => console.error(err));
     }
   }
 
   render() {
-    var markers = Object.keys(this.state.locations).map((location, id) => {
-        const lat = this.state.locations[`${location}`].lat
-        const lon = this.state.locations[`${location}`].lon
-        return <Point key={id} lat={lat} lon={lon} />
-    });
-    console.log(markers)
     return (
       <div className="App">
         <Map
@@ -57,7 +73,7 @@ class App extends Component {
             zoom: 14
           }}
         >
-          {markers}
+          <Point locations={this.state.locations} />
         </Map>
       </div>
     );
